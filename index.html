@@ -109,6 +109,7 @@
         #altarCommunity { animation-delay: 0.1s; }
         #losZglemkos { animation-delay: 0.3s; }
         #playKurfa { animation-delay: 0.5s; }
+        /* Removed #discordGateOption animation delay as it's on main page now */
 
         /* Description Modal Styling */
         .description-modal {
@@ -164,12 +165,20 @@
         <p class="text-xl md:text-2xl mb-10 text-center max-w-xl px-4 opacity-90">
             Sdružení serverů DoslovaAltara.
         </p>
-        <button
-            id="selectServerButton"
-            class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-700 text-white text-2xl font-bold rounded-full shadow-lg hover:from-purple-700 hover:to-indigo-800 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-75"
-        >
-            Vybrat server
-        </button>
+        <div class="flex flex-col sm:flex-row gap-6"> <!-- Flex container for buttons -->
+            <button
+                id="selectServerButton"
+                class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-700 text-white text-2xl font-bold rounded-full shadow-lg hover:from-purple-700 hover:to-indigo-800 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-75"
+            >
+                Vybrat server
+            </button>
+            <button
+                id="discordGateButton"
+                class="px-8 py-4 bg-gradient-to-r from-green-500 to-teal-600 text-white text-2xl font-bold rounded-full shadow-lg hover:from-green-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-400 focus:ring-opacity-75"
+            >
+                Připojit se pomocí Discord Gate
+            </button>
+        </div>
     </div>
 
     <!-- Server Selection Section (initially hidden) -->
@@ -198,6 +207,7 @@
                     O čem je server?
                 </button>
             </div>
+            <!-- Discord Gate Option was moved to main page -->
         </div>
         <button
             id="backButton"
@@ -219,9 +229,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const selectServerButton = document.getElementById('selectServerButton');
+            const discordGateButton = document.getElementById('discordGateButton');
             const mainPageSection = document.getElementById('mainPageSection');
             const serverSelectionSection = document.getElementById('serverSelectionSection');
-            const backButton = document.getElementById('backButton'); // Nové tlačítko Zpět
+            const backButton = document.getElementById('backButton');
 
             const altarCommunityDiv = document.getElementById('altarCommunity');
             const losZglemkosDiv = document.getElementById('losZglemkos');
@@ -250,13 +261,18 @@
                 },
                 loszglemkos: {
                     title: "Loš Žglemkos privátos",
-                    description: "Je to hrací komunita, kde hrajeme:\n🟠 GTA V\n🟠 Minecraft\n🟠 CS2\n🟠 RDR 2",
+                    description: "Je to hrací komunita, kde hrajeme:\n🟠 GTA V\n🟠 Minecraft\n🟠 CS2\n� RDR 2",
                     invite: 'https://discord.com/invite/kfWjnwcRrJ'
                 },
                 playkurfa: {
                     title: "PLAY KURFA",
                     description: "Tento server je soukromý.",
                     invite: 'https://discord.gg/9eCfs3EQWr'
+                },
+                discordGate: { // Nová položka pro Discord Gate
+                    title: "Discord Gate",
+                    description: "Připojte se přímo k hlavnímu Discord serveru, který slouží jako vstupní brána do celého sdružení Nitrogen Servers.",
+                    invite: 'https://discord.gg/UKvZdDaVdk'
                 }
             };
 
@@ -335,6 +351,12 @@
             selectServerButton.addEventListener('click', () => {
                 triggerHapticFeedback();
                 transitionToSection(mainPageSection, serverSelectionSection);
+            });
+
+            // Posluchač událostí pro tlačítko "Připojit se pomocí Discord Gate"
+            discordGateButton.addEventListener('click', () => {
+                triggerHapticFeedback();
+                window.open('https://discord.gg/UKvZdDaVdk', '_blank'); // Přímý odkaz na Discord Gate
             });
 
             // Posluchač událostí pro tlačítko "Zpět"
