@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nitrogen Servers</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for better aesthetics */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Hide scrollbars for background animation and particles */
+            /* Background animation */
+            background: linear-gradient(270deg, #1a202c, #2d3748, #1a202c);
+            background-size: 600% 600%;
+            animation: gradientAnimation 15s ease infinite;
+            position: relative; /* Needed for absolute positioning of particles */
+        }
+
+        /* Keyframes for background gradient animation */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Keyframes for section entry animation */
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Keyframes for server option entry animation */
+        @keyframes slideInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Generic section styling for transitions */
+        .page-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
+            width: 100vw; /* Full viewport width */
+            background-color: transparent; /* Make background transparent to see body gradient */
+            color: white;
+            position: absolute; /* Use absolute positioning for overlapping sections */
+            top: 0;
+            left: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; /* Smooth transition */
+            z-index: 2; /* Place content above particles */
+        }
+
+        .page-section.hidden {
+            display: none; /* Hide when not active */
+        }
+
+        .page-section.fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none; /* Disable interactions during fade-out */
+        }
+
+        .page-section.fade-in {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto; /* Enable interactions */
+            animation: fadeInScale 1s ease-out forwards; /* Initial entry animation */
+        }
+
+        /* Particle styling */
+        .particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Place particles below content */
+        }
+
+        /* Server option specific animation */
+        .server-option {
+            animation: slideInUp 0.6s ease-out forwards;
+            opacity: 0; /* Initially hidden */
+            display: flex; /* Ensure flex for content and button alignment */
+            flex-direction: column;
+            justify-content: space-between; /* Push button to bottom */
+            align-items: center;
+        }
+
+        /* Staggered animation delays for server options */
+        #altarCommunity { animation-delay: 0.1s; }
+        #losZglemkos { animation-delay: 0.3s; }
+        #playKurfa { animation-delay: 0.5s; }
+
+        /* Description Modal Styling */
+        .description-modal {
+            background-color: rgba(0, 0, 0, 0.85);
+            transition: opacity 0.3s ease-in-out;
+            z-index: 10; /* Ensure it's above other content */
+        }
+        .description-modal-content {
+            background-color: #2d3748;
+            padding: 2.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+            max-width: 90%;
+            width: 500px;
+            position: relative;
+            transform: scale(0.95);
+            opacity: 0;
+            animation: fadeInScale 0.3s ease-out forwards;
+        }
+        .description-modal-content h3 {
+            color: #a78bfa; /* Purple accent for title */
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .description-modal-content p {
+            color: #cbd5e0; /* Lighter text for description */
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: left; /* Align text left for bullet points */
+        }
+        .description-modal-content button {
+            background-color: #8b5cf6; /* Purple button */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px; /* Full rounded */
+            transition: background-color 0.2s ease;
+        }
+        .description-modal-content button:hover {
+            background-color: #7c3aed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+    <!-- Canvas for background particles -->
+    <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+    <!-- Main Page Section -->
+    <div id="mainPageSection" class="page-section fade-in">
+        <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-center drop-shadow-lg animate-pulse">
+            Nitrogen Servers
+        </h1>
+        <p class="text-xl md:text-2xl mb-10 text-center max-w-xl px-4 opacity-90">
+            Sdružení serverů DoslovaAltara.
+        </p>
+        <button
+            id="selectServerButton"
+            class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-700 text-white text-2xl font-bold rounded-full shadow-lg hover:from-purple-700 hover:to-indigo-800 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-75"
+        >
+            Vybrat server
+        </button>
+    </div>
+
+    <!-- Server Selection Section (initially hidden) -->
+    <div id="serverSelectionSection" class="page-section hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4 max-w-6xl mx-auto">
+            <!-- Altar Community Option -->
+            <div id="altarCommunity" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
+                <img src="https://i.imgur.com/e3q5Pyj.png" alt="Altar Community Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-purple-500">
+                <p class="text-xl font-semibold text-white mb-4">Altar community</p>
+                <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="altar">
+                    O čem je server?
+                </button>
+            </div>
+            <!-- Loš Žglemkos privátos Option -->
+            <div id="losZglemkos" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
+                <img src="https://i.imgur.com/b3aznuF.png" alt="Loš Žglemkos Privátos Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-indigo-500">
+                <p class="text-xl font-semibold text-white mb-4">Loš Žglemkos privátos</p>
+                <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="loszglemkos">
+                    O čem je server?
+                </button>
+            </div>
+            <!-- PLAY KURFA Option -->
+            <div id="playKurfa" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
+                <p class="text-3xl font-bold text-white text-center mb-4">PLAY KURFA</p>
+                <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="playkurfa">
+                    O čem je server?
+                </button>
+            </div>
+        </div>
+        <button
+            id="backButton"
+            class="mt-12 px-8 py-4 bg-gray-700 text-white text-xl font-bold rounded-full shadow-lg hover:bg-gray-600 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-75"
+        >
+            Zpět
+        </button>
+    </div>
+
+    <!-- Description Modal -->
+    <div id="descriptionModal" class="fixed inset-0 flex items-center justify-center hidden description-modal">
+        <div class="description-modal-content text-center">
+            <h3 id="modalTitle" class="text-2xl mb-4"></h3>
+            <p id="modalDescription" class="text-lg"></p>
+            <button id="closeDescriptionModal" class="mt-4">Zavřít</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectServerButton = document.getElementById('selectServerButton');
+            const mainPageSection = document.getElementById('mainPageSection');
+            const serverSelectionSection = document.getElementById('serverSelectionSection');
+            const backButton = document.getElementById('backButton'); // Nové tlačítko Zpět
+
+            const altarCommunityDiv = document.getElementById('altarCommunity');
+            const losZglemkosDiv = document.getElementById('losZglemkos');
+            const playKurfaDiv = document.getElementById('playKurfa');
+
+            const descriptionButtons = document.querySelectorAll('.description-button');
+            const descriptionModal = document.getElementById('descriptionModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDescription = document.getElementById('modalDescription');
+            const closeDescriptionModal = document.getElementById('closeDescriptionModal');
+
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let particles = [];
+            const numParticles = 100; // Počet částic
+            const particleSpeed = 0.5; // Rychlost částic
+            const transitionDuration = 500; // Doba trvání přechodu v ms
+
+            // Popisy serverů (Dynamické načítání dat)
+            const serverDescriptions = {
+                altar: {
+                    title: "Altar community",
+                    description: "Komunita je o:\n🟢 Komunitě a seberozvoji\n🟢 Komunikaci\n🟢 Přínosném obsahu\n🟢 Sedmideních výzvách",
+                    invite: 'https://discord.gg/EZ3B9RVQwE'
+                },
+                loszglemkos: {
+                    title: "Loš Žglemkos privátos",
+                    description: "Je to hrací komunita, kde hrajeme:\n🟠 GTA V\n🟠 Minecraft\n🟠 CS2\n🟠 RDR 2",
+                    invite: 'https://discord.com/invite/kfWjnwcRrJ'
+                },
+                playkurfa: {
+                    title: "PLAY KURFA",
+                    description: "Tento server je soukromý.",
+                    invite: 'https://discord.gg/9eCfs3EQWr'
+                }
+            };
+
+            // Funkce pro haptickou odezvu
+            function triggerHapticFeedback() {
+                if (navigator.vibrate) {
+                    navigator.vibrate(50); // Krátká vibrace 50ms
+                }
+            }
+
+            // Funkce pro změnu velikosti canvasu na celou obrazovku
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            // Třída pro částice
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 0.5; // Menší částice
+                    this.speedX = Math.random() * 1 - 0.5; // -0.5 až 0.5
+                    this.speedY = Math.random() * 1 - 0.5; // -0.5 až 0.5
+                    this.color = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`; // Poloprůhledná bílá
+                }
+                update() {
+                    this.x += this.speedX * particleSpeed;
+                    this.y += this.speedY * particleSpeed;
+
+                    // Zabalení částic přes okraje obrazovky
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Inicializace částic
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < numParticles; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            // Animační smyčka pro částice
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Vymazání canvasu
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update();
+                    particles[i].draw();
+                }
+                requestAnimationFrame(animateParticles);
+            }
+
+            // Funkce pro přechod mezi sekcemi
+            function transitionToSection(hideSection, showSection) {
+                hideSection.classList.add('fade-out');
+                // Počkejte na dokončení animace fade-out
+                setTimeout(() => {
+                    hideSection.classList.add('hidden');
+                    hideSection.classList.remove('fade-out'); // Odstranit fade-out třídu pro další použití
+                    showSection.classList.remove('hidden');
+                    showSection.classList.add('fade-in');
+                }, transitionDuration);
+            }
+
+            // Posluchač událostí pro tlačítko "Vybrat server"
+            selectServerButton.addEventListener('click', () => {
+                triggerHapticFeedback();
+                transitionToSection(mainPageSection, serverSelectionSection);
+            });
+
+            // Posluchač událostí pro tlačítko "Zpět"
+            backButton.addEventListener('click', () => {
+                triggerHapticFeedback();
+                transitionToSection(serverSelectionSection, mainPageSection);
+            });
+
+            // Posluchače událostí pro otevření Discord pozvánek (kliknutí na celý box serveru)
+            altarCommunityDiv.addEventListener('click', (event) => {
+                if (!event.target.closest('.description-button')) {
+                    triggerHapticFeedback();
+                    window.open(serverDescriptions.altar.invite, '_blank');
+                }
+            });
+
+            losZglemkosDiv.addEventListener('click', (event) => {
+                if (!event.target.closest('.description-button')) {
+                    triggerHapticFeedback();
+                    window.open(serverDescriptions.loszglemkos.invite, '_blank');
+                }
+            });
+
+            playKurfaDiv.addEventListener('click', (event) => {
+                if (!event.target.closest('.description-button')) {
+                    triggerHapticFeedback();
+                    window.open(serverDescriptions.playkurfa.invite, '_blank');
+                }
+            });
+
+            // Posluchače událostí pro tlačítka "O čem je server?"
+            descriptionButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    triggerHapticFeedback();
+                    event.stopPropagation(); // Zabrání šíření kliknutí na rodičovský div (aby se neotevřela pozvánka)
+                    const serverId = button.dataset.server;
+                    const descriptionData = serverDescriptions[serverId];
+
+                    if (descriptionData) {
+                        modalTitle.textContent = descriptionData.title;
+                        modalDescription.innerHTML = descriptionData.description.replace(/\n/g, '<br>');
+                        descriptionModal.classList.remove('hidden'); // Zobrazit modální okno
+                    }
+                });
+            });
+
+            // Posluchač událostí pro zavření modálního okna s popisem
+            closeDescriptionModal.addEventListener('click', () => {
+                triggerHapticFeedback();
+                descriptionModal.classList.add('hidden'); // Skrýt modální okno
+            });
+
+            // Počáteční nastavení
+            resizeCanvas();
+            initParticles();
+            animateParticles();
+
+            // Zpracování změny velikosti okna
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                initParticles(); // Znovu inicializovat částice při změně velikosti pro lepší distribuci
+            });
+        });
+    </script>
+</body>
+</html>
