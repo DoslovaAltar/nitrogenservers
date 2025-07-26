@@ -109,7 +109,6 @@
         #altarCommunity { animation-delay: 0.1s; }
         #losZglemkos { animation-delay: 0.3s; }
         #playKurfa { animation-delay: 0.5s; }
-        /* Removed #discordGateOption animation delay as it's on main page now */
 
         /* Description Modal Styling */
         .description-modal {
@@ -150,6 +149,49 @@
         .description-modal-content button:hover {
             background-color: #7c3aed;
         }
+
+        /* Video Intro Section Styling */
+        .video-intro-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            z-index: 3; /* Higher z-index to be on top */
+            overflow: hidden;
+            opacity: 1; /* Start visible for desktop */
+            transition: opacity 0.5s ease-in-out; /* For fade out */
+        }
+        .video-intro-section video {
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: cover; /* Ensure video covers the area */
+        }
+        .video-intro-section.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Unmute Button Styling */
+        #unmuteButton {
+            opacity: 1;
+            pointer-events: auto; /* Enable clicks */
+            transition: opacity 0.3s ease-in-out;
+        }
+        #unmuteButton.hidden-unmute {
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
@@ -157,8 +199,37 @@
     <!-- Canvas for background particles -->
     <canvas id="particleCanvas" class="particle-canvas"></canvas>
 
-    <!-- Main Page Section -->
-    <div id="mainPageSection" class="page-section fade-in">
+    <!-- Intro Gate Section (First screen) -->
+    <div id="introGateSection" class="page-section fade-in">
+        <h1 class="text-5xl md:text-6xl font-extrabold mb-8 text-center drop-shadow-lg">
+            Vítejte na Nitrogen Servers!
+        </h1>
+        <button
+            id="introGateButton"
+            class="px-10 py-5 bg-gradient-to-r from-blue-600 to-cyan-700 text-white text-3xl font-bold rounded-full shadow-lg hover:from-blue-700 hover:to-cyan-800 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-75"
+        >
+            Vejít na stránku
+        </button>
+    </div>
+
+    <!-- Video Intro Section (initially hidden) -->
+    <div id="videoIntroSection" class="video-intro-section hidden">
+        <video
+            id="introVideo"
+            src="Nitrogen_servers.mp4"
+            loop
+            playsinline
+            preload="auto"
+            title="Nitrogen Servers Intro Video">
+        </video>
+        <!-- Unmute Button - Starts as mute, but if video plays with sound, it will become unmute icon -->
+        <button id="unmuteButton" class="absolute bottom-4 right-4 bg-gray-800 bg-opacity-70 text-white p-3 rounded-full shadow-lg z-40 text-xl cursor-pointer hover:bg-opacity-90 transition-all duration-200">
+            🔊
+        </button>
+    </div>
+
+    <!-- Main Page Section (initially hidden) -->
+    <div id="mainPageSection" class="page-section hidden">
         <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-center drop-shadow-lg animate-pulse">
             Nitrogen Servers
         </h1>
@@ -207,7 +278,6 @@
                     O čem je server?
                 </button>
             </div>
-            <!-- Discord Gate Option was moved to main page -->
         </div>
         <button
             id="backButton"
@@ -228,6 +298,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const introGateSection = document.getElementById('introGateSection');
+            const introGateButton = document.getElementById('introGateButton');
+
             const selectServerButton = document.getElementById('selectServerButton');
             const discordGateButton = document.getElementById('discordGateButton');
             const mainPageSection = document.getElementById('mainPageSection');
@@ -248,11 +321,10 @@
             const ctx = canvas.getContext('2d');
 
             let particles = [];
-            const numParticles = 100; // Počet částic
-            const particleSpeed = 0.5; // Rychlost částic
-            const transitionDuration = 500; // Doba trvání přechodu v ms
+            const numParticles = 100;
+            const particleSpeed = 0.5;
+            const transitionDuration = 500;
 
-            // Popisy serverů (Dynamické načítání dat)
             const serverDescriptions = {
                 altar: {
                     title: "Altar community",
@@ -261,7 +333,7 @@
                 },
                 loszglemkos: {
                     title: "Loš Žglemkos privátos",
-                    description: "Je to hrací komunita, kde hrajeme:\n🟠 GTA V\n🟠 Minecraft\n🟠 CS2\n� RDR 2",
+                    description: "Je to hrací komunita, kde hrajeme:\n🟠 GTA V\n🟠 Minecraft\n🟠 CS2\n🟠 RDR 2",
                     invite: 'https://discord.com/invite/kfWjnwcRrJ'
                 },
                 playkurfa: {
@@ -269,41 +341,43 @@
                     description: "Tento server je soukromý.",
                     invite: 'https://discord.gg/9eCfs3EQWr'
                 },
-                discordGate: { // Nová položka pro Discord Gate
+                discordGate: {
                     title: "Discord Gate",
                     description: "Připojte se přímo k hlavnímu Discord serveru, který slouží jako vstupní brána do celého sdružení Nitrogen Servers.",
                     invite: 'https://discord.gg/UKvZdDaVdk'
                 }
             };
 
-            // Funkce pro haptickou odezvu
+            const videoIntroSection = document.getElementById('videoIntroSection');
+            const introVideo = document.getElementById('introVideo');
+            const unmuteButton = document.getElementById('unmuteButton');
+
+            const isDesktop = window.innerWidth >= 768;
+
             function triggerHapticFeedback() {
                 if (navigator.vibrate) {
-                    navigator.vibrate(50); // Krátká vibrace 50ms
+                    navigator.vibrate(50);
                 }
             }
 
-            // Funkce pro změnu velikosti canvasu na celou obrazovku
             function resizeCanvas() {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
             }
 
-            // Třída pro částice
             class Particle {
                 constructor() {
                     this.x = Math.random() * canvas.width;
                     this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 2 + 0.5; // Menší částice
-                    this.speedX = Math.random() * 1 - 0.5; // -0.5 až 0.5
-                    this.speedY = Math.random() * 1 - 0.5; // -0.5 až 0.5
-                    this.color = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`; // Poloprůhledná bílá
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = Math.random() * 1 - 0.5;
+                    this.speedY = Math.random() * 1 - 0.5;
+                    this.color = `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.2})`;
                 }
                 update() {
                     this.x += this.speedX * particleSpeed;
                     this.y += this.speedY * particleSpeed;
 
-                    // Zabalení částic přes okraje obrazovky
                     if (this.x < 0) this.x = canvas.width;
                     if (this.x > canvas.width) this.x = 0;
                     if (this.y < 0) this.y = canvas.height;
@@ -317,7 +391,6 @@
                 }
             }
 
-            // Inicializace částic
             function initParticles() {
                 particles = [];
                 for (let i = 0; i < numParticles; i++) {
@@ -325,9 +398,8 @@
                 }
             }
 
-            // Animační smyčka pro částice
             function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // Vymazání canvasu
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 for (let i = 0; i < particles.length; i++) {
                     particles[i].update();
                     particles[i].draw();
@@ -335,37 +407,72 @@
                 requestAnimationFrame(animateParticles);
             }
 
-            // Funkce pro přechod mezi sekcemi
             function transitionToSection(hideSection, showSection) {
                 hideSection.classList.add('fade-out');
-                // Počkejte na dokončení animace fade-out
                 setTimeout(() => {
                     hideSection.classList.add('hidden');
-                    hideSection.classList.remove('fade-out'); // Odstranit fade-out třídu pro další použití
+                    hideSection.classList.remove('fade-out');
                     showSection.classList.remove('hidden');
                     showSection.classList.add('fade-in');
                 }, transitionDuration);
             }
 
-            // Posluchač událostí pro tlačítko "Vybrat server"
+            // Logika pro úvodní bránu
+            introGateButton.addEventListener('click', () => {
+                triggerHapticFeedback();
+                if (isDesktop) {
+                    // Na desktopu přejít na video intro
+                    transitionToSection(introGateSection, videoIntroSection);
+                    unmuteButton.classList.remove('hidden-unmute'); // Zobrazit tlačítko zvuku
+                    introVideo.muted = false; // Zkusit odtlumit video hned po kliknutí
+                    introVideo.play().catch(error => {
+                        console.warn("Video autoplay with sound blocked:", error);
+                        // Pokud autoplay se zvukem selže, zkusit přehrát ztlumeně a informovat uživatele
+                        introVideo.muted = true;
+                        introVideo.play().catch(e => console.error("Video play muted also failed:", e));
+                        unmuteButton.textContent = '🔇'; // Zobrazit ikonu ztlumení
+                        alert("Váš prohlížeč zablokoval automatické přehrávání videa se zvukem. Prosím, klikněte na ikonu reproduktoru pro zapnutí zvuku.");
+                    });
+
+
+                    setTimeout(() => {
+                        introVideo.pause();
+                        unmuteButton.classList.add('hidden-unmute');
+                        transitionToSection(videoIntroSection, mainPageSection);
+                    }, 5000);
+                } else {
+                    // Na mobilních zařízeních přeskočit video a rovnou zobrazit hlavní stránku
+                    transitionToSection(introGateSection, mainPageSection);
+                    unmuteButton.classList.add('hidden-unmute');
+                }
+            });
+
             selectServerButton.addEventListener('click', () => {
                 triggerHapticFeedback();
                 transitionToSection(mainPageSection, serverSelectionSection);
             });
 
-            // Posluchač událostí pro tlačítko "Připojit se pomocí Discord Gate"
             discordGateButton.addEventListener('click', () => {
                 triggerHapticFeedback();
-                window.open('https://discord.gg/UKvZdDaVdk', '_blank'); // Přímý odkaz na Discord Gate
+                window.open('https://discord.gg/UKvZdDaVdk', '_blank');
             });
 
-            // Posluchač událostí pro tlačítko "Zpět"
             backButton.addEventListener('click', () => {
                 triggerHapticFeedback();
                 transitionToSection(serverSelectionSection, mainPageSection);
             });
 
-            // Posluchače událostí pro otevření Discord pozvánek (kliknutí na celý box serveru)
+            unmuteButton.addEventListener('click', () => {
+                triggerHapticFeedback();
+                if (introVideo.muted) {
+                    introVideo.muted = false;
+                    unmuteButton.textContent = '🔊';
+                } else {
+                    introVideo.muted = true;
+                    unmuteButton.textContent = '🔇';
+                }
+            });
+
             altarCommunityDiv.addEventListener('click', (event) => {
                 if (!event.target.closest('.description-button')) {
                     triggerHapticFeedback();
@@ -387,37 +494,33 @@
                 }
             });
 
-            // Posluchače událostí pro tlačítka "O čem je server?"
             descriptionButtons.forEach(button => {
                 button.addEventListener('click', (event) => {
                     triggerHapticFeedback();
-                    event.stopPropagation(); // Zabrání šíření kliknutí na rodičovský div (aby se neotevřela pozvánka)
+                    event.stopPropagation();
                     const serverId = button.dataset.server;
                     const descriptionData = serverDescriptions[serverId];
 
                     if (descriptionData) {
                         modalTitle.textContent = descriptionData.title;
                         modalDescription.innerHTML = descriptionData.description.replace(/\n/g, '<br>');
-                        descriptionModal.classList.remove('hidden'); // Zobrazit modální okno
+                        descriptionModal.classList.remove('hidden');
                     }
                 });
             });
 
-            // Posluchač událostí pro zavření modálního okna s popisem
             closeDescriptionModal.addEventListener('click', () => {
                 triggerHapticFeedback();
-                descriptionModal.classList.add('hidden'); // Skrýt modální okno
+                descriptionModal.classList.add('hidden');
             });
 
-            // Počáteční nastavení
             resizeCanvas();
             initParticles();
             animateParticles();
 
-            // Zpracování změny velikosti okna
             window.addEventListener('resize', () => {
                 resizeCanvas();
-                initParticles(); // Znovu inicializovat částice při změně velikosti pro lepší distribuci
+                initParticles();
             });
         });
     </script>
