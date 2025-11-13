@@ -109,6 +109,7 @@
         #altarCommunity { animation-delay: 0.1s; }
         #losZglemkos { animation-delay: 0.3s; }
         #playKurfa { animation-delay: 0.5s; }
+        #tomiusServer { animation-delay: 0.7s; } /* New delay for Tomiův server */
 
         /* Description Modal Styling */
         .description-modal {
@@ -255,11 +256,11 @@
     <!-- Server Selection Section (initially hidden) -->
     <div id="serverSelectionSection" class="page-section hidden">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4 max-w-6xl mx-auto">
-            <!-- Altar Community Option -->
-            <div id="altarCommunity" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
-                <img src="https://i.imgur.com/e3q5Pyj.png" alt="Altar Community Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-purple-500">
-                <p class="text-xl font-semibold text-white mb-4">Altar community</p>
-                <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="altar">
+            <!-- Altar Community Option - VIZUÁLNĚ NEJVĚTŠÍ -->
+            <div id="altarCommunity" class="server-option flex flex-col items-center p-10 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300 lg:col-span-2">
+                <img src="https://i.imgur.com/e3q5Pyj.png" alt="Altar Community Logo" class="w-40 h-40 rounded-full mb-6 object-cover border-4 border-purple-500 ring-4 ring-purple-300">
+                <p class="text-3xl font-bold text-white mb-6 text-center">Altar community</p>
+                <button class="description-button px-8 py-3 bg-purple-600 text-white text-lg rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="altar">
                     O čem je server?
                 </button>
             </div>
@@ -275,6 +276,14 @@
             <div id="playKurfa" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
                 <p class="text-3xl font-bold text-white text-center mb-4">PLAY KURFA</p>
                 <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="playkurfa">
+                    O čem je server?
+                </button>
+            </div>
+            <!-- Tomiův Server Option -->
+            <div id="tomiusServer" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
+                <img src="https://i.imgur.com/NdIoJV7.png" alt="Tomiův Server Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-red-500">
+                <p class="text-xl font-semibold text-white mb-4">Tomiův server</p>
+                <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="tomiusServer">
                     O čem je server?
                 </button>
             </div>
@@ -310,6 +319,7 @@
             const altarCommunityDiv = document.getElementById('altarCommunity');
             const losZglemkosDiv = document.getElementById('losZglemkos');
             const playKurfaDiv = document.getElementById('playKurfa');
+            const tomiusServerDiv = document.getElementById('tomiusServer');
 
             const descriptionButtons = document.querySelectorAll('.description-button');
             const descriptionModal = document.getElementById('descriptionModal');
@@ -340,6 +350,11 @@
                     title: "PLAY KURFA",
                     description: "Tento server je soukromý.",
                     invite: 'https://discord.gg/9eCfs3EQWr'
+                },
+                tomiusServer: {
+                    title: "Tomiův server",
+                    description: "Tento server je soukromý.",
+                    invite: 'https://discord.gg/KsktJfrXem'
                 },
                 discordGate: {
                     title: "Discord Gate",
@@ -431,7 +446,8 @@
                         introVideo.muted = true;
                         introVideo.play().catch(e => console.error("Video play muted also failed:", e));
                         unmuteButton.textContent = '🔇'; // Zobrazit ikonu ztlumení
-                        alert("Váš prohlížeč zablokoval automatické přehrávání videa se zvukem. Prosím, klikněte na ikonu reproduktoru pro zapnutí zvuku.");
+                        // Zde by měla být custom modal zpráva, ne alert()
+                        // alert("Váš prohlížeč zablokoval automatické přehrávání videa se zvukem. Prosím, klikněte na ikonu reproduktoru pro zapnutí zvuku."); 
                     });
 
 
@@ -454,7 +470,7 @@
 
             discordGateButton.addEventListener('click', () => {
                 triggerHapticFeedback();
-                window.open('https://discord.gg/UKvZdDaVdk', '_blank');
+                window.open(serverDescriptions.discordGate.invite, '_blank');
             });
 
             backButton.addEventListener('click', () => {
@@ -493,6 +509,14 @@
                     window.open(serverDescriptions.playkurfa.invite, '_blank');
                 }
             });
+            
+            // Click handler pro Tomiův server
+            tomiusServerDiv.addEventListener('click', (event) => {
+                if (!event.target.closest('.description-button')) {
+                    triggerHapticFeedback();
+                    window.open(serverDescriptions.tomiusServer.invite, '_blank');
+                }
+            });
 
             descriptionButtons.forEach(button => {
                 button.addEventListener('click', (event) => {
@@ -503,8 +527,10 @@
 
                     if (descriptionData) {
                         modalTitle.textContent = descriptionData.title;
+                        // Používáme innerHTML a <br> pro správné zalomení řádků z popisu s '\n'
                         modalDescription.innerHTML = descriptionData.description.replace(/\n/g, '<br>');
                         descriptionModal.classList.remove('hidden');
+                        document.querySelector('.description-modal-content').focus(); // Zaměření pro lepší přístupnost
                     }
                 });
             });
