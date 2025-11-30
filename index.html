@@ -109,7 +109,7 @@
         #altarCommunity { animation-delay: 0.1s; }
         #losZglemkos { animation-delay: 0.3s; }
         #playKurfa { animation-delay: 0.5s; }
-        #tomiusServer { animation-delay: 0.7s; } /* New delay for Tomiův server */
+        #tomiusServer { animation-delay: 0.7s; } /* New delay for Glory to Arstotzka */
 
         /* Description Modal Styling */
         .description-modal {
@@ -279,10 +279,10 @@
                     O čem je server?
                 </button>
             </div>
-            <!-- Tomiův Server Option -->
+            <!-- Glory to Arstotzka Option (Původně Tomiův Server) -->
             <div id="tomiusServer" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
-                <img src="https://i.imgur.com/NdIoJV7.png" alt="Tomiův Server Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-red-500">
-                <p class="text-xl font-semibold text-white mb-4">Tomiův server</p>
+                <img src="https://i.imgur.com/4LAaNKT.png" alt="Glory to Arstotzka Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-yellow-500">
+                <p class="text-xl font-semibold text-white mb-4">Glory to Arstotzka</p>
                 <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="tomiusServer">
                     O čem je server?
                 </button>
@@ -352,7 +352,7 @@
                     invite: 'https://discord.gg/9eCfs3EQWr'
                 },
                 tomiusServer: {
-                    title: "Tomiův server",
+                    title: "Glory to Arstotzka", // Změněno z "Tomiův server"
                     description: "Tento server je soukromý.",
                     invite: 'https://discord.gg/KsktJfrXem'
                 },
@@ -510,7 +510,7 @@
                 }
             });
             
-            // Click handler pro Tomiův server
+            // Click handler pro Glory to Arstotzka (původně Tomiův server)
             tomiusServerDiv.addEventListener('click', (event) => {
                 if (!event.target.closest('.description-button')) {
                     triggerHapticFeedback();
