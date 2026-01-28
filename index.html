@@ -103,19 +103,39 @@
             flex-direction: column;
             justify-content: space-between; /* Push button to bottom */
             align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Global Notification Bar Styling */
+        .global-notification-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(239, 68, 68, 0.95); /* red-500 with slight opacity */
+            color: white;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            z-index: 50; /* Above everything */
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: none; /* Hidden by default, shown via JS in server selection */
         }
 
         /* Staggered animation delays for server options */
         #altarCommunity { animation-delay: 0.1s; }
         #losZglemkos { animation-delay: 0.3s; }
         #playKurfa { animation-delay: 0.5s; }
-        #tomiusServer { animation-delay: 0.7s; } /* New delay for Glory to Arstotzka */
+        #tomiusServer { animation-delay: 0.7s; }
 
         /* Description Modal Styling */
         .description-modal {
             background-color: rgba(0, 0, 0, 0.85);
             transition: opacity 0.3s ease-in-out;
-            z-index: 10; /* Ensure it's above other content */
+            z-index: 60; /* Above notification bar */
         }
         .description-modal-content {
             background-color: #2d3748;
@@ -223,7 +243,7 @@
             preload="auto"
             title="Nitrogen Servers Intro Video">
         </video>
-        <!-- Unmute Button - Starts as mute, but if video plays with sound, it will become unmute icon -->
+        <!-- Unmute Button -->
         <button id="unmuteButton" class="absolute bottom-4 right-4 bg-gray-800 bg-opacity-70 text-white p-3 rounded-full shadow-lg z-40 text-xl cursor-pointer hover:bg-opacity-90 transition-all duration-200">
             🔊
         </button>
@@ -237,7 +257,7 @@
         <p class="text-xl md:text-2xl mb-10 text-center max-w-xl px-4 opacity-90">
             Sdružení serverů DoslovaAltara.
         </p>
-        <div class="flex flex-col sm:flex-row gap-6"> <!-- Flex container for buttons -->
+        <div class="flex flex-col sm:flex-row gap-6">
             <button
                 id="selectServerButton"
                 class="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-700 text-white text-2xl font-bold rounded-full shadow-lg hover:from-purple-700 hover:to-indigo-800 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-75"
@@ -254,9 +274,9 @@
     </div>
 
     <!-- Server Selection Section (initially hidden) -->
-    <div id="serverSelectionSection" class="page-section hidden">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4 max-w-6xl mx-auto">
-            <!-- Altar Community Option - VIZUÁLNĚ NEJVĚTŠÍ -->
+    <div id="serverSelectionSection" class="page-section hidden overflow-y-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4 max-w-6xl mx-auto mt-16 md:mt-0">
+            <!-- Altar Community Option -->
             <div id="altarCommunity" class="server-option flex flex-col items-center p-10 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300 lg:col-span-2">
                 <img src="https://i.imgur.com/e3q5Pyj.png" alt="Altar Community Logo" class="w-40 h-40 rounded-full mb-6 object-cover border-4 border-purple-500 ring-4 ring-purple-300">
                 <p class="text-3xl font-bold text-white mb-6 text-center">Altar community</p>
@@ -264,14 +284,16 @@
                     O čem je server?
                 </button>
             </div>
+
             <!-- Loš Žglemkos privátos Option -->
-            <div id="losZglemkos" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
-                <img src="https://i.imgur.com/b3aznuF.png" alt="Loš Žglemkos Privátos Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-indigo-500">
-                <p class="text-xl font-semibold text-white mb-4">Loš Žglemkos privátos</p>
-                <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="loszglemkos">
+            <div id="losZglemkos" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300 border-2 border-red-500/50">
+                <img src="https://i.imgur.com/b3aznuF.png" alt="Loš Žglemkos Privátos Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-indigo-500/50 grayscale opacity-80">
+                <p class="text-xl font-semibold text-gray-400 mb-4">Loš Žglemkos privátos</p>
+                <button class="description-button px-6 py-2 bg-gray-700 text-white rounded-full hover:bg-gray-600 transition-colors mt-auto" data-server="loszglemkos">
                     O čem je server?
                 </button>
             </div>
+
             <!-- PLAY KURFA Option -->
             <div id="playKurfa" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
                 <p class="text-3xl font-bold text-white text-center mb-4">PLAY KURFA</p>
@@ -279,10 +301,11 @@
                     O čem je server?
                 </button>
             </div>
-            <!-- Glory to Arstotzka Option (Původně Tomiův Server) -->
+
+            <!-- Holubník Option -->
             <div id="tomiusServer" class="server-option flex flex-col items-center p-6 bg-gray-800 rounded-lg shadow-xl cursor-pointer hover:scale-105 transition-transform duration-300">
-                <img src="https://i.imgur.com/4LAaNKT.png" alt="Glory to Arstotzka Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-yellow-500">
-                <p class="text-xl font-semibold text-white mb-4">Glory to Arstotzka</p>
+                <img src="https://i.imgur.com/nEFfko1.jpeg" alt="Holubník Logo" class="w-32 h-32 rounded-full mb-4 object-cover border-4 border-sky-400">
+                <p class="text-xl font-semibold text-white mb-4">Holubník</p>
                 <button class="description-button px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors mt-auto" data-server="tomiusServer">
                     O čem je server?
                 </button>
@@ -290,10 +313,15 @@
         </div>
         <button
             id="backButton"
-            class="mt-12 px-8 py-4 bg-gray-700 text-white text-xl font-bold rounded-full shadow-lg hover:bg-gray-600 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-75"
+            class="my-8 mb-20 px-8 py-4 bg-gray-700 text-white text-xl font-bold rounded-full shadow-lg hover:bg-gray-600 transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-75"
         >
             Zpět
         </button>
+    </div>
+
+    <!-- Global Information Bar -->
+    <div id="globalNotification" class="global-notification-bar">
+        📢 Server <strong>Loš Žglemkos privátos</strong> přechází pod novou správu a nadále již nebude součástí Nitrogen Servers. Děkujeme komunitě za společné zážitky a novým správcům přejeme hodně štěstí. Za Nitrogen Servers, <em>DoslovaAltar</em>.
     </div>
 
     <!-- Description Modal -->
@@ -309,12 +337,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             const introGateSection = document.getElementById('introGateSection');
             const introGateButton = document.getElementById('introGateButton');
-
             const selectServerButton = document.getElementById('selectServerButton');
             const discordGateButton = document.getElementById('discordGateButton');
             const mainPageSection = document.getElementById('mainPageSection');
             const serverSelectionSection = document.getElementById('serverSelectionSection');
             const backButton = document.getElementById('backButton');
+            const globalNotification = document.getElementById('globalNotification');
 
             const altarCommunityDiv = document.getElementById('altarCommunity');
             const losZglemkosDiv = document.getElementById('losZglemkos');
@@ -343,7 +371,7 @@
                 },
                 loszglemkos: {
                     title: "Loš Žglemkos privátos",
-                    description: "Je to hrací komunita, kde hrajeme:\n🟠 GTA V\n🟠 Minecraft\n🟠 CS2\n🟠 RDR 2",
+                    description: "Tento server byl hrací komunitou (GTA V, Minecraft, CS2).\n\n⚠️ OZNÁMENÍ: Server migruje k jiným majitelům a byl odpojen od sítě Nitrogen Servers.",
                     invite: 'https://discord.com/invite/kfWjnwcRrJ'
                 },
                 playkurfa: {
@@ -352,7 +380,7 @@
                     invite: 'https://discord.gg/9eCfs3EQWr'
                 },
                 tomiusServer: {
-                    title: "Glory to Arstotzka", // Změněno z "Tomiův server"
+                    title: "Holubník", 
                     description: "Tento server je soukromý.",
                     invite: 'https://discord.gg/KsktJfrXem'
                 },
@@ -392,7 +420,6 @@
                 update() {
                     this.x += this.speedX * particleSpeed;
                     this.y += this.speedY * particleSpeed;
-
                     if (this.x < 0) this.x = canvas.width;
                     if (this.x > canvas.width) this.x = 0;
                     if (this.y < 0) this.y = canvas.height;
@@ -429,37 +456,34 @@
                     hideSection.classList.remove('fade-out');
                     showSection.classList.remove('hidden');
                     showSection.classList.add('fade-in');
+                    
+                    // Show notification bar only in server selection
+                    if (showSection === serverSelectionSection) {
+                        globalNotification.style.display = 'block';
+                    } else {
+                        globalNotification.style.display = 'none';
+                    }
                 }, transitionDuration);
             }
 
-            // Logika pro úvodní bránu
             introGateButton.addEventListener('click', () => {
                 triggerHapticFeedback();
                 if (isDesktop) {
-                    // Na desktopu přejít na video intro
                     transitionToSection(introGateSection, videoIntroSection);
-                    unmuteButton.classList.remove('hidden-unmute'); // Zobrazit tlačítko zvuku
-                    introVideo.muted = false; // Zkusit odtlumit video hned po kliknutí
+                    unmuteButton.classList.remove('hidden-unmute');
+                    introVideo.muted = false;
                     introVideo.play().catch(error => {
-                        console.warn("Video autoplay with sound blocked:", error);
-                        // Pokud autoplay se zvukem selže, zkusit přehrát ztlumeně a informovat uživatele
                         introVideo.muted = true;
-                        introVideo.play().catch(e => console.error("Video play muted also failed:", e));
-                        unmuteButton.textContent = '🔇'; // Zobrazit ikonu ztlumení
-                        // Zde by měla být custom modal zpráva, ne alert()
-                        // alert("Váš prohlížeč zablokoval automatické přehrávání videa se zvukem. Prosím, klikněte na ikonu reproduktoru pro zapnutí zvuku."); 
+                        introVideo.play();
+                        unmuteButton.textContent = '🔇';
                     });
-
-
                     setTimeout(() => {
                         introVideo.pause();
                         unmuteButton.classList.add('hidden-unmute');
                         transitionToSection(videoIntroSection, mainPageSection);
                     }, 5000);
                 } else {
-                    // Na mobilních zařízeních přeskočit video a rovnou zobrazit hlavní stránku
                     transitionToSection(introGateSection, mainPageSection);
-                    unmuteButton.classList.add('hidden-unmute');
                 }
             });
 
@@ -480,13 +504,8 @@
 
             unmuteButton.addEventListener('click', () => {
                 triggerHapticFeedback();
-                if (introVideo.muted) {
-                    introVideo.muted = false;
-                    unmuteButton.textContent = '🔊';
-                } else {
-                    introVideo.muted = true;
-                    unmuteButton.textContent = '🔇';
-                }
+                introVideo.muted = !introVideo.muted;
+                unmuteButton.textContent = introVideo.muted ? '🔇' : '🔊';
             });
 
             altarCommunityDiv.addEventListener('click', (event) => {
@@ -510,7 +529,6 @@
                 }
             });
             
-            // Click handler pro Glory to Arstotzka (původně Tomiův server)
             tomiusServerDiv.addEventListener('click', (event) => {
                 if (!event.target.closest('.description-button')) {
                     triggerHapticFeedback();
@@ -524,13 +542,10 @@
                     event.stopPropagation();
                     const serverId = button.dataset.server;
                     const descriptionData = serverDescriptions[serverId];
-
                     if (descriptionData) {
                         modalTitle.textContent = descriptionData.title;
-                        // Používáme innerHTML a <br> pro správné zalomení řádků z popisu s '\n'
                         modalDescription.innerHTML = descriptionData.description.replace(/\n/g, '<br>');
                         descriptionModal.classList.remove('hidden');
-                        document.querySelector('.description-modal-content').focus(); // Zaměření pro lepší přístupnost
                     }
                 });
             });
